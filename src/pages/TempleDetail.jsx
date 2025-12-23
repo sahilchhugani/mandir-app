@@ -258,12 +258,65 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
           </button>
         </div>
 
+        {/* Google Rating Card */}
+        {temple.googleRating > 0 && (
+          <div style={{
+            marginTop: '1rem',
+            padding: '1.25rem',
+            borderRadius: '1rem',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginBottom: '0.25rem' }}>Google Rating</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: '#efc01f', fontSize: '1.75rem', fontWeight: 700 }}>{temple.googleRating}</span>
+                <div style={{ display: 'flex', gap: '2px' }}>
+                  {[1,2,3,4,5].map(star => (
+                    <Star 
+                      key={star} 
+                      size={16} 
+                      fill={star <= Math.round(temple.googleRating) ? '#efc01f' : 'transparent'}
+                      color="#efc01f"
+                    />
+                  ))}
+                </div>
+              </div>
+              {temple.googleReviewCount > 0 && (
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '0.25rem' }}>
+                  {temple.googleReviewCount.toLocaleString()} reviews
+                </p>
+              )}
+            </div>
+            {temple.googleMapsUrl && (
+              <a 
+                href={temple.googleMapsUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '0.5rem', 
+                  background: 'rgba(255,255,255,0.05)', 
+                  color: 'rgba(255,255,255,0.7)',
+                  fontSize: '12px',
+                  textDecoration: 'none'
+                }}
+              >
+                View on Google
+              </a>
+            )}
+          </div>
+        )}
+
         {/* Rate This Temple Button */}
         <button
           onClick={() => setShowRatingModal(true)}
           style={{
             width: '100%',
-            marginTop: '0.75rem',
+            marginTop: '1rem',
             padding: '1rem',
             borderRadius: '1rem',
             fontWeight: 600,
@@ -282,7 +335,7 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
           {userRating ? 'Edit Your Rating' : 'Rate This Temple'}
         </button>
 
-        {/* Description */}
+        {/* Description / About */}
         <div style={{
           marginTop: '1.5rem',
           padding: '1.25rem',
@@ -291,8 +344,50 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
           border: '1px solid rgba(255,255,255,0.08)'
         }}>
           <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.75rem' }}>About</h2>
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', lineHeight: 1.6 }}>{temple.description}</p>
+          {temple.description ? (
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', lineHeight: 1.6 }}>{temple.description}</p>
+          ) : (
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', lineHeight: 1.6 }}>
+              {temple.name} is a {temple.religion || 'Hindu'} temple located in {temple.location || 'India'}. 
+              {temple.deity && temple.deity !== 'Various' && ` It is dedicated to ${temple.deity}.`}
+              {temple.googleRating > 0 && ` Rated ${temple.googleRating} stars on Google with ${temple.googleReviewCount?.toLocaleString() || 'many'} reviews.`}
+            </p>
+          )}
         </div>
+
+        {/* Google Reviews */}
+        {temple.reviews && temple.reviews.length > 0 && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1.25rem',
+            borderRadius: '1.5rem',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)'
+          }}>
+            <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem', marginBottom: '1rem' }}>Google Reviews</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {temple.reviews.map((review, index) => (
+                <div key={index} style={{ 
+                  padding: '1rem', 
+                  borderRadius: '0.75rem', 
+                  background: 'rgba(255,255,255,0.02)' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ color: 'white', fontWeight: 500, fontSize: '14px' }}>{review.author}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Star size={12} fill="#efc01f" color="#efc01f" />
+                      <span style={{ color: '#efc01f', fontSize: '12px' }}>{review.rating}</span>
+                    </div>
+                  </div>
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', lineHeight: 1.5 }}>
+                    {review.text?.slice(0, 200)}{review.text?.length > 200 ? '...' : ''}
+                  </p>
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '0.5rem' }}>{review.time}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Friend Ratings Section */}
         {friendCount > 0 && (

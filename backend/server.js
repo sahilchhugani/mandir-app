@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
 
 dotenv.config();
 
@@ -8,21 +10,43 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
-// Middleware
+// Security: HTTP headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow images to load
+}));
+
+// Security: Rate limiting - 100 requests per 15 minutes per IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', limiter);
+
+// Security: CORS - only allow specific origins
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
   : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    // Allow requests with no origin (for mobile apps) only in development
+    if (!origin) {
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error('No origin header - blocked in production'));
+      }
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('🚫 Blocked request from:', origin);
       callback(new Error('Not allowed by CORS'));
     }
-  }
+  },
+  credentials: true,
 }));
 app.use(express.json());
 
@@ -233,12 +257,14 @@ app.get('/api/photo', async (req, res) => {
 /**
  * Transform Google Place to our temple format
  */
-function transformPlace(place, index) {
+function transformPlace(place, index, baseUrl = '') {
   // Get photo URL if available
   let imageUrl = null;
   if (place.photos && place.photos.length > 0) {
     const photoRef = place.photos[0].photo_reference;
-    imageUrl = `http://localhost:${PORT}/api/photo?ref=${encodeURIComponent(photoRef)}&maxwidth=800`;
+    // Use the backend URL from environment or construct from request
+    const backendUrl = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+    imageUrl = `${backendUrl}/api/photo?ref=${encodeURIComponent(photoRef)}&maxwidth=800`;
   }
 
   // Extract state from address

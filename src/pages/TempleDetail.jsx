@@ -10,13 +10,27 @@ import RatingModal from '../components/RatingModal'
 function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
   const { id } = useParams()
   const navigate = useNavigate()
-  const temple = temples.find(t => t.id === parseInt(id))
+  // Handle both numeric IDs (mock data) and string IDs (Google Places)
+  const temple = temples.find(t => 
+    t.id === id || 
+    t.id === parseInt(id) || 
+    t.placeId === id ||
+    String(t.id) === id
+  )
   const [showRatingModal, setShowRatingModal] = useState(false)
 
   if (!temple) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p style={{ color: 'rgba(255,255,255,0.5)' }}>Temple not found</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#342920' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1rem' }}>Temple not found</p>
+          <button 
+            onClick={() => navigate('/')}
+            style={{ padding: '0.75rem 1.5rem', borderRadius: '0.75rem', background: '#efc01f', color: 'black', border: 'none', cursor: 'pointer' }}
+          >
+            Go Home
+          </button>
+        </div>
       </div>
     )
   }
@@ -82,12 +96,19 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
   return (
     <div className="min-h-screen">
       {/* Hero Image */}
-      <div className="relative" style={{ height: '45vh', minHeight: '320px' }}>
-        <img
-          src={temple.image}
-          alt={temple.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
+      <div className="relative" style={{ height: '45vh', minHeight: '320px', background: '#2a201a' }}>
+        {temple.image ? (
+          <img
+            src={temple.image}
+            alt={temple.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={(e) => { e.target.style.display = 'none' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '4rem', opacity: 0.3 }}>🛕</span>
+          </div>
+        )}
         <div style={{
           position: 'absolute',
           inset: 0,
@@ -453,32 +474,34 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
         </div>
 
         {/* Special Features */}
-        <div style={{
-          marginTop: '1.5rem',
-          padding: '1.25rem',
-          borderRadius: '1.5rem',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)'
-        }}>
-          <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.75rem' }}>Highlights</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {temple.specialFeatures.map((feature, index) => (
-              <span
-                key={index}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '9999px',
-                  background: 'rgba(239, 192, 31, 0.1)',
-                  color: '#efc01f',
-                  fontSize: '14px',
-                  border: '1px solid rgba(239, 192, 31, 0.2)'
-                }}
-              >
-                {feature}
-              </span>
-            ))}
+        {temple.specialFeatures && temple.specialFeatures.length > 0 && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1.25rem',
+            borderRadius: '1.5rem',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)'
+          }}>
+            <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem', marginBottom: '0.75rem' }}>Highlights</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {temple.specialFeatures.map((feature, index) => (
+                <span
+                  key={index}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '9999px',
+                    background: 'rgba(239, 192, 31, 0.1)',
+                    color: '#efc01f',
+                    fontSize: '14px',
+                    border: '1px solid rgba(239, 192, 31, 0.2)'
+                  }}
+                >
+                  {feature}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Map Preview */}
         <button

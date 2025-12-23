@@ -389,53 +389,60 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
           </div>
         )}
 
-        {/* Friend Ratings Section */}
-        {friendCount > 0 && (
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '1.25rem',
-            borderRadius: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem' }}>
-                Ratings
-              </h2>
-              {overallAverage && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ color: '#efc01f', fontSize: '1.5rem', fontWeight: 700 }}>{overallAverage}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>avg</span>
-                </div>
-              )}
-            </div>
-            
-            {/* Category Ratings */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {ratingCategories.map(category => {
-                const avgRating = category.id === 'crowdLevels' 
-                  ? getMostCommonCrowdLevel()
-                  : getAverageRating(category.id)
-                
-                if (!avgRating) return null
-                
-                return (
-                  <div 
-                    key={category.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.75rem',
-                      borderRadius: '0.75rem',
-                      background: 'rgba(255,255,255,0.03)'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '1.25rem' }}>{category.icon}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px' }}>{category.name}</span>
+        {/* Category Ratings Section - Always show */}
+        <div style={{
+          marginTop: '1.5rem',
+          padding: '1.25rem',
+          borderRadius: '1.5rem',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+            <h2 style={{ color: 'white', fontWeight: 600, fontSize: '1.125rem' }}>
+              Community Ratings
+            </h2>
+            {overallAverage && friendCount > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: '#efc01f', fontSize: '1.5rem', fontWeight: 700 }}>{overallAverage}</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>avg</span>
+              </div>
+            )}
+          </div>
+          
+          {friendCount > 0 && (
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginBottom: '1rem' }}>
+              Based on {friendCount} rating{friendCount !== 1 ? 's' : ''}
+            </p>
+          )}
+          
+          {/* Category Ratings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {ratingCategories.map(category => {
+              const avgRating = category.id === 'crowdLevels' 
+                ? getMostCommonCrowdLevel()
+                : getAverageRating(category.id)
+              
+              return (
+                <div 
+                  key={category.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem',
+                    borderRadius: '0.75rem',
+                    background: 'rgba(255,255,255,0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.25rem' }}>{category.icon}</span>
+                    <div>
+                      <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', display: 'block' }}>{category.name}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{category.description}</span>
                     </div>
-                    {category.id === 'crowdLevels' ? (
+                  </div>
+                  {category.id === 'crowdLevels' ? (
+                    avgRating ? (
                       <span style={{
                         padding: '0.25rem 0.75rem',
                         borderRadius: '9999px',
@@ -451,17 +458,36 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
                         {avgRating}
                       </span>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <span style={{ color: '#efc01f', fontWeight: 600 }}>{avgRating}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>/5</span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>No data</span>
+                    )
+                  ) : avgRating ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <span style={{ color: '#efc01f', fontWeight: 600 }}>{avgRating}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>/5</span>
+                    </div>
+                  ) : (
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>—</span>
+                  )}
+                </div>
+              )
+            })}
           </div>
-        )}
+          
+          {friendCount === 0 && (
+            <p style={{ 
+              color: 'rgba(255,255,255,0.4)', 
+              fontSize: '13px', 
+              textAlign: 'center', 
+              marginTop: '1rem',
+              padding: '1rem',
+              background: 'rgba(239, 192, 31, 0.05)',
+              borderRadius: '0.75rem',
+              border: '1px solid rgba(239, 192, 31, 0.1)'
+            }}>
+              Be the first to rate this temple!
+            </p>
+          )}
+        </div>
 
         {/* Individual Friend Reviews */}
         {friendCount > 0 && (
@@ -519,24 +545,6 @@ function TempleDetail({ temples, toggleWishlist, toggleVisited, addRating }) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* No Ratings Yet */}
-        {friendCount === 0 && (
-          <div style={{
-            marginTop: '1.5rem',
-            padding: '2rem',
-            borderRadius: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            textAlign: 'center'
-          }}>
-            <span style={{ fontSize: '2rem' }}>⭐</span>
-            <h3 style={{ color: 'white', fontWeight: 600, marginTop: '0.75rem' }}>No ratings yet</h3>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginTop: '0.5rem' }}>
-              Be the first to rate this temple!
-            </p>
           </div>
         )}
 
